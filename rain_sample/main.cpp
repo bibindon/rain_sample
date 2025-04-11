@@ -22,6 +22,13 @@ LPD3DXEFFECT pEffect = NULL;
 D3DXMATERIAL* d3dxMaterials = NULL;
 float f = 0.0f;
 
+//-------------------------------------------
+// 雨表示用
+//-------------------------------------------
+LPD3DXSPRITE sprite = NULL;
+LPDIRECT3DTEXTURE9 texture = NULL;
+D3DXVECTOR3 pos(0.f, 0.f, 0.f);
+
 void TextDraw(LPD3DXFONT pFont, char* text, int X, int Y)
 {
     RECT rect = { X,Y,0,0 };
@@ -118,6 +125,28 @@ HRESULT InitD3D(HWND hWnd)
         NULL
     );
 
+    //----------------------------------
+    // 雨表示用
+    //----------------------------------
+
+    //「テクスチャオブジェクト」の作成
+    HRESULT result = E_FAIL;
+
+    result = D3DXCreateTextureFromFile(g_pd3dDevice, "raindrop.bmp", &texture);
+    if (FAILED(result))
+    {
+        MessageBox(0, "テクスチャの作成に失敗しました", "", MB_OK);
+        return E_FAIL;
+    }
+
+    // 「スプライトオブジェクト」の作成
+    result = D3DXCreateSprite(g_pd3dDevice, &sprite);
+    if (FAILED(result))
+    {
+        MessageBox(0, "スプライトの作成に失敗しました", "", MB_OK);
+        return E_FAIL;
+    }
+
     return S_OK;
 }
 
@@ -139,6 +168,15 @@ VOID Render()
     }
     f += 0.025f;
 
+    // 雨の表示用
+    pos.y += 100;
+    if (pos.y >= 600.f)
+    {
+        pos.y = 0.f;
+        pos.x = rand() % 800;
+    }
+
+
     D3DXMATRIX mat;
     D3DXMATRIX View, Proj;
     D3DXMatrixPerspectiveFovLH(&Proj, D3DXToRadian(45), 640.0f / 480.0f, 1.0f, 10000.0f);
@@ -156,7 +194,7 @@ VOID Render()
     if (SUCCEEDED(g_pd3dDevice->BeginScene()))
     {
         char msg[100];
-        strcpy_s(msg, 100, "Xファイルの読み込みと表示");
+        strcpy_s(msg, 100, "雨の表示");
         TextDraw(g_pFont, msg, 0, 0);
 
         pEffect->SetTechnique("BasicTec");
@@ -169,8 +207,23 @@ VOID Render()
             pEffect->CommitChanges();
             pMesh->DrawSubset(i);
         }
+
+        // 雨の表示
+        {
+            sprite->Begin(D3DXSPRITE_ALPHABLEND);
+            RECT rect { };
+            rect.left = 0;
+            rect.top = 0;
+            rect.right = 100;
+            rect.bottom = 100;
+            D3DXVECTOR3 center(0.f, 0.f, 0.f);
+            sprite->Draw(texture, &rect, &center, &pos, 0xBBBBBBBB);
+            sprite->End();
+        }
+
         pEffect->EndPass();
         pEffect->End();
+
         g_pd3dDevice->EndScene();
     }
 
