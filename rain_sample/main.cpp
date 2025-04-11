@@ -27,7 +27,7 @@ float f = 0.0f;
 //-------------------------------------------
 LPD3DXSPRITE sprite = NULL;
 LPDIRECT3DTEXTURE9 texture = NULL;
-D3DXVECTOR3 pos(0.f, 0.f, 0.f);
+D3DXVECTOR3 pos[6];
 
 void TextDraw(LPD3DXFONT pFont, char* text, int X, int Y)
 {
@@ -147,11 +147,19 @@ HRESULT InitD3D(HWND hWnd)
         return E_FAIL;
     }
 
+    for (int i = 0; i < 6; ++i)
+    {
+        pos[i] = D3DXVECTOR3(0.f, 100.f * i, 0.f);
+    }
+
     return S_OK;
 }
 
 VOID Cleanup()
 {
+    SAFE_RELEASE(texture);
+    SAFE_RELEASE(sprite);
+
     SAFE_RELEASE((*pTextures));
     SAFE_RELEASE(pMesh);
     SAFE_RELEASE(pEffect);
@@ -169,11 +177,14 @@ VOID Render()
     f += 0.025f;
 
     // ‰J‚Ì•\Ž¦—p
-    pos.y += 100;
-    if (pos.y >= 600.f)
+    for (int i = 0; i < 6; ++i)
     {
-        pos.y = 0.f;
-        pos.x = rand() % 800;
+        pos[i].y += 80;
+        if (pos[i].y >= 600.f)
+        {
+            pos[i].y = 0.f;
+            pos[i].x = (float)(rand() % 800);
+        }
     }
 
 
@@ -217,7 +228,10 @@ VOID Render()
             rect.right = 100;
             rect.bottom = 100;
             D3DXVECTOR3 center(0.f, 0.f, 0.f);
-            sprite->Draw(texture, &rect, &center, &pos, 0xBBBBBBBB);
+            for (int i = 0; i < 6; ++i)
+            {
+                sprite->Draw(texture, &rect, &center, &pos[i], 0xBBBBBBBB);
+            }
             sprite->End();
         }
 
