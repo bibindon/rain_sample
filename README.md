@@ -1,4 +1,10 @@
 
+
+
+https://github.com/user-attachments/assets/7356e72e-a991-4f89-85ab-a04a0bc14e43
+
+
+
 雨の表示。
 
 ちなみに・・・
